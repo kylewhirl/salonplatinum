@@ -32,8 +32,7 @@ jobs:
         run: |
           rm -rf instagram-images
           mkdir -p instagram-images
-          instaloader --login kylewhirl --sessionfile ~/.config/instaloader/session-kylewhirl \
-            --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={shortcode} salonplatinumreno
+          instaloader --login kylewhirl --sessionfile ~/.config/instaloader/session-kylewhirl --count=3 --no-videos --no-metadata-json --no-captions --fast-update --dirname-pattern=instagram-images --filename-pattern={shortcode} salonplatinumreno
           
       - name: Rename images to 1.jpg, 2.jpg, and 3.jpg
         run: |
