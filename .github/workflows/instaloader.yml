@@ -1,0 +1,44 @@
+name: Download Instagram Images
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  schedule:
+    - cron: '0 12 * * *'  # Runs daily at 12 PM UTC
+
+jobs:
+  download_instagram_images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Instaloader
+        run: pip install instaloader
+
+      - name: Download last 3 images
+        run: |
+          rm -rf instagram-images
+          mkdir -p instagram-images
+          instaloader --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={index} salonplatinumreno
+          mv instagram-images/*.jpg instagram-images/
+          
+      - name: Rename images to 1.png, 2.png, and 3.png
+        run: |
+          cd instagram-images
+          ls -1t | head -n 3 | awk '{print "mv "$0" "NR".png"}' | bash
+          cd ..
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add instagram-images/
+          git diff --staged --quiet || (git commit -m "Update Instagram images" && git push)
