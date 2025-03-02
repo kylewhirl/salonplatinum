@@ -33,13 +33,12 @@ jobs:
           rm -rf instagram-images
           mkdir -p instagram-images
           instaloader --login kylewhirl --sessionfile ~/.config/instaloader/session-kylewhirl \
-            --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={index} salonplatinumreno
-          mv instagram-images/*.jpg instagram-images/
+            --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={shortcode} salonplatinumreno
           
-      - name: Rename images to 1.png, 2.png, and 3.png
+      - name: Rename images to 1.jpg, 2.jpg, and 3.jpg
         run: |
           cd instagram-images
-          ls -1t | head -n 3 | awk '{print "mv "$0" "NR".png"}' | bash
+          ls -1t | head -n 3 | awk '{print "mv "$0" "NR".jpg"}' | bash
           cd ..
 
       - name: Commit and Push Changes
