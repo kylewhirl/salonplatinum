@@ -1,6 +1,5 @@
 import instaloader
 import os
-import re
 
 # Define parameters
 USERNAME = "kylewhirl"  # Your Instagram username
@@ -24,23 +23,26 @@ profile = instaloader.Profile.from_username(loader.context, TARGET_PROFILE)
 # Track downloaded images
 downloaded_images = 0
 
-# Loop through profile posts (excluding pinned posts)
+# Loop through profile posts
 for post in profile.get_posts():
     if downloaded_images >= IMAGE_LIMIT:
         break  # Stop after 3 images
 
-    # Get all image URLs in the post (handles carousel posts)
-    image_urls = post.get_sidecar_nodes() if post.is_sidecar else [post]
+    # If post is a carousel (multiple images), only take the first image
+    if post.typename == "GraphSidecar":
+        first_image = next(iter(post.get_sidecar_nodes()), None)  # Get first item from generator
+        if first_image is not None:
+            image_url = first_image.display_url
+        else:
+            continue  # Skip if no valid image found
+    else:
+        image_url = post.url  # Use post.url for single image posts
 
-    for index, img in enumerate(image_urls):
-        if downloaded_images >= IMAGE_LIMIT:
-            break  # Stop once we have 3 images
+    # Define filename without extension so that Instaloader appends .jpg automatically
+    image_filename = f"{OUTPUT_DIR}/{downloaded_images + 1}"
 
-        # Define filename
-        image_filename = f"{OUTPUT_DIR}/{downloaded_images + 1}.jpg"
-
-        # Download the image
-        loader.download_pic(image_filename, img.display_url, post.date_utc)
-        downloaded_images += 1
+    # Download the image
+    loader.download_pic(image_filename, image_url, post.date_utc)
+    downloaded_images += 1
 
 print(f"Downloaded {downloaded_images} images to {OUTPUT_DIR}.")
