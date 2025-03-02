@@ -26,13 +26,13 @@ jobs:
       - name: Restore Instagram Session
         run: |
           mkdir -p ~/.config/instaloader/
-          echo "${{ secrets.INSTALOADER_SESSION }}" | base64 --decode > ~/.config/instaloader/session-your_instagram_username
+          echo "${{ secrets.INSTALOADER_SESSION }}" | base64 --decode > ~/.config/instaloader/session-kylewhirl
 
       - name: Download last 3 images
         run: |
           rm -rf instagram-images
           mkdir -p instagram-images
-          instaloader --login your_instagram_username --sessionfile ~/.config/instaloader/session-your_instagram_username \
+          instaloader --login kylewhirl --sessionfile ~/.config/instaloader/session-kylewhirl \
             --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={index} salonplatinumreno
           mv instagram-images/*.jpg instagram-images/
           
