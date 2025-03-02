@@ -1,5 +1,6 @@
 import instaloader
 import os
+import re
 
 # Define parameters
 USERNAME = "kylewhirl"  # Your Instagram username
@@ -20,34 +21,26 @@ loader.load_session_from_file(USERNAME, SESSION_FILE)
 # Fetch profile
 profile = instaloader.Profile.from_username(loader.context, TARGET_PROFILE)
 
-# Collect images: first pinned, then newest regular posts
+# Track downloaded images
 downloaded_images = 0
-image_queue = []  # Stores tuples (url, filename)
 
-# First, get pinned posts
-for post in profile.get_pinned_posts():
-    if downloaded_images >= IMAGE_LIMIT:
-        break
-    image_urls = post.get_sidecar_nodes() if post.is_sidecar else [post]
-    for img in image_urls:
-        if downloaded_images >= IMAGE_LIMIT:
-            break
-        image_queue.append((img.display_url, f"{OUTPUT_DIR}/{downloaded_images + 1}.jpg"))
-        downloaded_images += 1
-
-# Next, get regular (non-pinned) posts to fill remaining slots
+# Loop through profile posts (excluding pinned posts)
 for post in profile.get_posts():
     if downloaded_images >= IMAGE_LIMIT:
-        break
-    image_urls = post.get_sidecar_nodes() if post.is_sidecar else [post]
-    for img in image_urls:
-        if downloaded_images >= IMAGE_LIMIT:
-            break
-        image_queue.append((img.display_url, f"{OUTPUT_DIR}/{downloaded_images + 1}.jpg"))
-        downloaded_images += 1
+        break  # Stop after 3 images
 
-# Download the images
-for url, filename in image_queue:
-    loader.download_pic(filename, url, None)
+    # Get all image URLs in the post (handles carousel posts)
+    image_urls = post.get_sidecar_nodes() if post.is_sidecar else [post]
+
+    for index, img in enumerate(image_urls):
+        if downloaded_images >= IMAGE_LIMIT:
+            break  # Stop once we have 3 images
+
+        # Define filename
+        image_filename = f"{OUTPUT_DIR}/{downloaded_images + 1}.jpg"
+
+        # Download the image
+        loader.download_pic(image_filename, img.display_url, post.date_utc)
+        downloaded_images += 1
 
 print(f"Downloaded {downloaded_images} images to {OUTPUT_DIR}.")
