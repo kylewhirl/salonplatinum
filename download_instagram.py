@@ -20,15 +20,34 @@ loader.load_session_from_file(USERNAME, SESSION_FILE)
 # Fetch profile
 profile = instaloader.Profile.from_username(loader.context, TARGET_PROFILE)
 
-# Track downloaded images
+# Collect images: first pinned, then newest regular posts
 downloaded_images = 0
+image_queue = []  # Stores tuples (url, filename)
 
-# Loop through profile posts and download only 3 images
+# First, get pinned posts
+for post in profile.get_pinned_posts():
+    if downloaded_images >= IMAGE_LIMIT:
+        break
+    image_urls = post.get_sidecar_nodes() if post.is_sidecar else [post]
+    for img in image_urls:
+        if downloaded_images >= IMAGE_LIMIT:
+            break
+        image_queue.append((img.display_url, f"{OUTPUT_DIR}/{downloaded_images + 1}.jpg"))
+        downloaded_images += 1
+
+# Next, get regular (non-pinned) posts to fill remaining slots
 for post in profile.get_posts():
     if downloaded_images >= IMAGE_LIMIT:
-        break  # Stop after 3 images
+        break
+    image_urls = post.get_sidecar_nodes() if post.is_sidecar else [post]
+    for img in image_urls:
+        if downloaded_images >= IMAGE_LIMIT:
+            break
+        image_queue.append((img.display_url, f"{OUTPUT_DIR}/{downloaded_images + 1}.jpg"))
+        downloaded_images += 1
 
-    loader.download_post(post, target=OUTPUT_DIR)
-    downloaded_images += 1
+# Download the images
+for url, filename in image_queue:
+    loader.download_pic(filename, url, None)
 
 print(f"Downloaded {downloaded_images} images to {OUTPUT_DIR}.")
