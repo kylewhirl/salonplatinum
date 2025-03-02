@@ -28,6 +28,11 @@ jobs:
           mkdir -p ~/.config/instaloader/
           echo "${{ secrets.INSTALOADER_SESSION }}" | base64 --decode > ~/.config/instaloader/session-kylewhirl
 
+      - name: Remove Instagram Images
+        run: |
+          rm -rf instagram-images
+          mkdir -p instagram-images
+          
       - name: Run Instagram Image Downloader
         run: python download_instagram.py
 
