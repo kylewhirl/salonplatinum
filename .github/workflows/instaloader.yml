@@ -1,7 +1,7 @@
 name: Download Instagram Images
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
   schedule:
     - cron: '0 12 * * *'  # Runs daily at 12 PM UTC
 
@@ -23,11 +23,17 @@ jobs:
       - name: Install Instaloader
         run: pip install instaloader
 
+      - name: Restore Instagram Session
+        run: |
+          mkdir -p ~/.config/instaloader/
+          echo "${{ secrets.INSTALOADER_SESSION }}" | base64 --decode > ~/.config/instaloader/session-your_instagram_username
+
       - name: Download last 3 images
         run: |
           rm -rf instagram-images
           mkdir -p instagram-images
-          instaloader --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={index} salonplatinumreno
+          instaloader --login your_instagram_username --sessionfile ~/.config/instaloader/session-your_instagram_username \
+            --no-videos --no-metadata-json --no-captions --fast-update --count=3 --dirname-pattern=instagram-images --filename-pattern={index} salonplatinumreno
           mv instagram-images/*.jpg instagram-images/
           
       - name: Rename images to 1.png, 2.png, and 3.png
