@@ -2,8 +2,6 @@ name: Download Instagram Images
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 12 * * *'  # Runs daily at 12 PM UTC
 
 jobs:
   download_instagram_images:
